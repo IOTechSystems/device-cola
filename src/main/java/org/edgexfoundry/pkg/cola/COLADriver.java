@@ -20,9 +20,13 @@
 
 package org.edgexfoundry.pkg.cola;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+
+import de.sick.sopas.scl.ColaDialect;
+import org.edgexfoundry.exception.controller.ServiceException;
 import org.edgexfoundry.pkg.data.DeviceStore;
 import org.edgexfoundry.pkg.data.ObjectStore;
 import org.edgexfoundry.pkg.data.ProfileStore;
@@ -84,7 +88,7 @@ public class COLADriver {
     // TODO 2: [Optional] Modify this processCommand call to pass any additional required metadata
     // from the profile to the driver stack
     result = processCommand(operation.getOperation(), device.getAddressable(),
-        object.getAttributes(), value);
+            object.getAttributes(), value, transactionId,object);
 
     objectCache.put(device, operation, result);
     handler.completeTransaction(transactionId, opId, objectCache.getResponses(device, operation));
@@ -93,7 +97,7 @@ public class COLADriver {
   // Modify this function as needed to pass necessary metadata from the device and its profile to
   // the driver interface
   public String processCommand(String operation, Addressable addressable,
-      COLAAttribute attributes, String value) {
+                               COLAAttribute attributes, String value, String transactionId,COLAObject object) {
     String address = addressable.getPath();
     String intface = addressable.getAddress();
     logger.debug("ProcessCommand: " + operation + ", interface: " + intface + ", address: "
@@ -101,12 +105,37 @@ public class COLADriver {
     String result = "";
 
     // TODO 1: [Required] COLA stack goes here, return the raw value from the device
-    // as a string for processing
-    if (operation.toLowerCase().equals("get")) {
-      Random rand = new Random();
-      result = Float.toString(rand.nextFloat() * 100);
-    } else {
-      result = value;
+    TiM5Driver l_driver = null;
+    try {
+      l_driver = new TiM5Driver(addressable.getAddress(), addressable.getPort(), ColaDialect.COLA_B);
+      l_driver.connect();
+
+      // as a string for processing
+      if (operation.toLowerCase().equals("get")) {
+//        Random rand = new Random();
+//        result = Float.toString(rand.nextFloat() * 100);
+
+        //        System.out.println("Serial number:    " + l_driver.readSerialnumber());
+        result = l_driver.read(object.getName());
+      } else {
+        result = value;
+      }
+
+
+    } catch (IOException e) {
+      logger.error("Driver process Exception e:" + e.getMessage());
+      logger.debug(e.getMessage(), e);
+      handler.failTransaction(transactionId, new ServiceException(e));
+      Thread.currentThread().interrupt();
+    } finally {
+      try {
+        l_driver.disconnect();
+      } catch (IOException e) {
+        logger.error("Driver disconnect failed Exception e:" + e.getMessage());
+        logger.debug(e.getMessage(), e);
+        handler.failTransaction(transactionId, new ServiceException(e));
+        Thread.currentThread().interrupt();
+      }
     }
 
     return result;

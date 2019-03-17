@@ -198,7 +198,7 @@ public class COLAHandler {
       String val = null;
 
       if (method.equals("set")) {
-        val = parseArguments(arguments, operation, device, object, objects);
+        val = parseArguments(arguments, operation, device, object, objects, transactionId);
       }
 
       // command operation for client processing
@@ -271,7 +271,7 @@ public class COLAHandler {
   }
 
   private String parseArguments(String arguments, ResourceOperation operation, Device device,
-      COLAObject object, Map<String, COLAObject> objects) {
+                                COLAObject object, Map<String, COLAObject> objects, String transactionId) {
 
     PropertyValue value = object.getProperties().getValue();
     String val = parseArg(arguments, operation, value, operation.getParameter());
@@ -280,7 +280,7 @@ public class COLAHandler {
     // the mask first
     if (!value.mask().equals(BigInteger.ZERO)) {
       String result =
-          driver.processCommand("get", device.getAddressable(), object.getAttributes(), val);
+              driver.processCommand("get", device.getAddressable(), object.getAttributes(), val, transactionId,object);
       val = transform.maskedValue(value, val, result);
       if (operation.getSecondary() != null) {
         for (String secondary: operation.getSecondary()) {
@@ -346,6 +346,14 @@ public class COLAHandler {
   public void completeTransaction(String transactionId, String opId, List<Reading> readings) {
     synchronized (transactions) {
       transactions.get(transactionId).finishOp(opId, readings);
+      transactions.notifyAll();
+    }
+  }
+
+  public void failTransaction(String transactionId, RuntimeException e) {
+    synchronized (transactions) {
+      transactions.get(transactionId).setFailed();
+      transactions.get(transactionId).setFailException(e);
       transactions.notifyAll();
     }
   }
