@@ -9,13 +9,11 @@ description: "SICK 2d Lidar SEnSorS"
 deviceResources:
   - name: SerialNumber
     description: "Device serial number"
-    attributes:
-      { type: "analogInput", instance: "3000290" }
     properties:
       value:
-        { type: "String", size: "", readWrite: "", defaultValue: "", minimum: "", maximum: ""  }
+        { type: "String", readWrite: "R", defaultValue: "", minimum: "", maximum: ""  }
       units:
-        { type: "String", readWrite: "R", defaultValue: "Degrees Fahrenheit" }
+        { type: "String", readWrite: "R", defaultValue: "" }
 
 resources:
   - name: SerialNumber
