@@ -25,5 +25,3 @@ function register_sensor(deviceNameParam)
 end
 
 register_sensor("Zone 1 Lidar")
-sleep(1.0)
-register_sensor("Zone 2 Lidar")

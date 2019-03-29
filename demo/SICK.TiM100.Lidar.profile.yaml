@@ -14,11 +14,31 @@ deviceResources:
         { type: "String", readWrite: "R", defaultValue: "", minimum: "", maximum: ""  }
       units:
         { type: "String", readWrite: "R", defaultValue: "" }
+  - name: DistanceAhead
+    description: "Distance Value ahead of the scanner"
+    properties:
+      value:
+        { type: "String", readWrite: "R", defaultValue: "", minimum: "", maximum: ""  }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "" }
+  - name: Scandata
+    description: "scan data"
+    properties:
+      value:
+        { type: "String", readWrite: "R", defaultValue: "", minimum: "", maximum: ""  }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "" }
 
 resources:
   - name: SerialNumber
     get:
       - { index: "1", operation: "get", object: "SerialNumber", parameter: "SerialNumber", property: "value" }
+  - name: DistanceAhead
+    get:
+      - { index: "1", operation: "get", object: "DistanceAhead", parameter: "DistanceAhead", property: "value" }
+  - name: Scandata
+    get:
+      - { index: "1", operation: "get", object: "Scandata", parameter: "Scandata", property: "value" }
 
 commands:
   - name: SerialNumber
@@ -28,6 +48,26 @@ commands:
         - code: "200"
           description: ""
           expectedValues: ["SerialNumber"]
+        - code: "503"
+          description: "service unavailable"
+          expectedValues: []
+  - name: DistanceAhead
+    get:
+      path: "/api/v1/device/{deviceId}/DistanceAhead"
+      responses:
+        - code: "200"
+          description: ""
+          expectedValues: ["DistanceAhead"]
+        - code: "503"
+          description: "service unavailable"
+          expectedValues: []
+  - name: Scandata
+    get:
+      path: "/api/v1/device/{deviceId}/Scandata"
+      responses:
+        - code: "200"
+          description: ""
+          expectedValues: ["Scandata"]
         - code: "503"
           description: "service unavailable"
           expectedValues: []

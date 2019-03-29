@@ -114,6 +114,11 @@
 			<artifactId>activation</artifactId>
 			<version>1.1.1</version>
 		</dependency>
+		<dependency>
+			<groupId>de.sick.sopas</groupId>
+			<artifactId>scl-full</artifactId>
+			<version>3.5.6</version>
+		</dependency>
 	</dependencies>
 	
 	<dependencyManagement>
